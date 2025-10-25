@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Matches - ReedStreams</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #8db902;
+            --secondary-color: #0a0e17;
+            --accent-color: #1a2332;
+            --text-light: #ffffff;
+            --text-muted: #a0aec0;
+            --transition: all 0.3s ease;
+            --border-radius: 8px;
+            --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            --gradient: linear-gradient(135deg, rgba(13, 18, 29, 0.85) 0%, rgba(26, 35, 50, 0.75) 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--secondary-color);
+            color: var(--text-light);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Transparent Header */
+        .header {
+            background: transparent;
+            padding: 1.5rem 3rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            transition: var(--transition);
+        }
+
+        .header.scrolled {
+            background: rgba(10, 14, 23, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 3rem;
+            border-bottom: 1px solid rgba(141, 185, 2, 0.2);
+        }
+
+        .header-hidden {
+            transform: translateY(-100%);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .logo-text {
+            color: var(--text-light);
+        }
+
+        .logo-accent {
+            color: var(--primary-color);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-light);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1rem;
+            position: relative;
+            padding: 0.5rem 0;
+            transition: var(--transition);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--primary-color);
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-color);
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .watch-now-btn {
+            background-color: var(--primary-color);
+            color: var(--secondary-color);
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 4px 15px rgba(141, 185, 2, 0.3);
+        }
+
+        .watch-now-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(141, 185, 2, 0.4);
+        }
+
+        /* Live Hero Section */
+        .live-hero {
+            background: linear-gradient(rgba(10, 14, 23, 0.85), rgba(10, 14, 23, 0.9)), 
+                        url('https://th.bing.com/th/id/R.f346ed80789bacc3c2e709fc6ce284b3?rik=0ETTUcjut1VHQA&riu=http%3a%2f%2fwallpapercave.com%2fwp%2fwp1827614.jpg&ehk=fAoQAv2jwTyzxdKdGUcoykHpciBgq64ah4Ex9kaNDmM%3d&risl=&pid=ImgRaw&r=0') no-repeat center center/cover;
+            padding: 12rem 2rem 6rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .live-icon {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 2rem;
+            display: block;
+        }
+
+        .live-hero h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(to right, #ffffff, var(--primary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            margin-bottom: 3rem;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .tab-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .tab-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-light);
+            padding: 0.8rem 2rem;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .tab-btn.active {
+            background: var(--primary-color);
+            color: var(--secondary-color);
+            border-color: var(--primary-color);
+        }
+
+        .tab-btn:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Matches Section */
+        .matches-section {
+            padding: 5rem 2rem;
+            background: 
+                linear-gradient(135deg, #0a0e17 0%, #1a2332 50%, #0a0e17 100%),
+                radial-gradient(circle at 20% 80%, rgba(141, 185, 2, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(52, 152, 219, 0.1) 0%, transparent 50%);
+            background-blend-mode: overlay, screen, screen;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .matches-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(45deg, transparent 0%, rgba(141, 185, 2, 0.03) 50%, transparent 100%);
+            z-index: 0;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .section-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text-light);
+        }
+
+        .section-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Matches Grid Layout */
+        .matches-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Match Card Design - Premium Version */
+        .match-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid var(--primary-color);
+            border-radius: 20px;
+            padding: 1.5rem;
+            transition: var(--transition);
+            backdrop-filter: blur(100px);
+            background-color: rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .match-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 15px solid var(--primary-color);
+            transition: var(--transition);
+            opacity: 0;
+        }
+
+        .match-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .match-card:hover::before {
+            opacity: 1;
+        }
+
+        .match-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .match-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-light);
+            flex: 1;
+        }
+
+        .live-badge {
+            background: #d4201a;
+            color: white;
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(212, 32, 26, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(212, 32, 26, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(212, 32, 26, 0);
+            }
+        }
+
+        /* Teams Container */
+        .teams-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 12px;
+        }
+
+        .team-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            flex: 1;
+        }
+
+        .team-badge {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 5px;
+            transition: var(--transition);
+        }
+
+        .match-card:hover .team-badge {
+            transform: scale(1.1);
+        }
+
+        .team-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-light);
+            text-align: center;
+        }
+
+        .vs-separator {
+            font-weight: 700;
+            color: var(--primary-color);
+            font-size: 1.2rem;
+            padding: 0 1rem;
+        }
+
+        .team-placeholder {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            font-size: 1.5rem;
+            color: var(--gray);
+        }
+
+        /* Match Info */
+        .match-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding: 0.8rem;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 8px;
+        }
+
+        .match-time {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .match-competition {
+            font-size: 0.9rem;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        /* Watch Button */
+        .watch-link {
+            display: block;
+            width: 100%;
+            padding: 1rem 2rem;
+            background: var(--primary-color);
+            color: var(--secondary-color);
+            border: none;
+            border-radius: var(--border-radius);
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .watch-link:hover {
+            background: #7aa302;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(141, 185, 2, 0.4);
+        }
+
+        /* Loading and Error States */
+        .loading-message, .error-message, .no-matches {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            grid-column: 1 / -1;
+        }
+
+        .error-message {
+            color: #d4201a;
+        }
+
+        /* Gradient Accent */
+        .gradient-accent {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.4;
+            z-index: 0;
+        }
+
+        .accent-1 {
+            background: radial-gradient(circle, var(--primary-color) 0%, transparent 70%);
+            top: 10%;
+            left: 5%;
+        }
+
+        .accent-2 {
+            background: radial-gradient(circle, #3498db 0%, transparent 70%);
+            bottom: 10%;
+            right: 5%;
+        }
+
+        /* Footer Styles */
+        .footer {
+            background: linear-gradient(to bottom, #0a0e17, #070a12);
+            padding: 3rem 0 1.5rem;
+            border-top: 1px solid rgba(141, 185, 2, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(to right, transparent, var(--primary-color), transparent);
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2.5rem;
+        }
+
+        .footer-main {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+
+        .footer-brand {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .footer-tagline {
+            color: var(--text-muted);
+            font-size: 1rem;
+            line-height: 1.6;
+            max-width: 400px;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-column {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .footer-heading {
+            color: var(--primary-color);
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        .footer-heading::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 30px;
+            height: 2px;
+            background-color: var(--primary-color);
+        }
+
+        .footer-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .footer-link:hover {
+            color: var(--primary-color);
+            transform: translateX(5px);
+        }
+
+        .legal-notice {
+            background: rgba(141, 185, 2, 0.1);
+            border: 1px solid rgba(141, 185, 2, 0.2);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            text-align: center;
+            margin-top: 1rem;
+            color: var(--text-muted);
+        }
+
+        .legal-text {
+            font-size: 0.9rem;
+        }
+
+        .legal-highlight {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .footer-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .footer-legal-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .footer-legal-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .footer-legal-link:hover {
+            color: var(--primary-color);
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .social-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .social-link:hover {
+            background: var(--primary-color);
+            color: var(--secondary-color);
+            transform: translateY(-3px);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header {
+                padding: 1rem 1.5rem;
+            }
+            
+            .header.scrolled {
+                padding: 0.8rem 1.5rem;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .live-hero {
+                padding: 10rem 1.5rem 4rem;
+            }
+            
+            .live-hero h1 {
+                font-size: 2rem;
+            }
+            
+            .tab-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .tab-btn {
+                width: 200px;
+            }
+            
+            .matches-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            
+            .match-card {
+                padding: 1.25rem;
+            }
+            
+            .team-badge {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .footer-main {
+                flex-direction: column;
+                gap: 2.5rem;
+            }
+            
+            .footer-links {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .live-hero h1 {
+                font-size: 1.8rem;
+            }
+            
+            .teams-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .vs-separator {
+                transform: rotate(90deg);
+            }
+            
+            .footer-links {
+                flex-direction: column;
+                gap: 2rem;
+            }
+            
+            .footer-legal-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .matches-grid {
+                grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Transparent Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <span class="logo-text">Reed</span>
+                <span class="logo-accent">Streams</span>
+            </div>
+            
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="#" style="color: var(--primary-color);">Live</a></li>
+                    <li><a href="upcoming.html">Upcoming</a></li>
+                    <li><a href="sports.html">Sports</a></li>
+                </ul>
+            </nav>
+            
+            <div class="nav-actions">
+                <button class="watch-now-btn" onclick="window.location.href='sports.html'">
+                    <i class="fas fa-play-circle"></i> All Sports
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Live Hero Section -->
+    <section class="live-hero">
+        <div class="live-hero-content">
+            <i class="fas fa-broadcast-tower live-icon"></i>
+            <h1>Live Matches</h1>
+            <p class="hero-subtitle">Watch your favorite sports live in HD quality. Never miss a moment of the action.</p>
+        </div>
+    </section>
+
+    <!-- Matches Section -->
+    <section class="matches-section">
+        <!-- Gradient Accents -->
+        <div class="gradient-accent accent-1"></div>
+        <div class="gradient-accent accent-2"></div>
+        
+        <div class="section-header">
+            <h2 class="section-title" id="page-title">Live Now</h2>
+            <p class="section-subtitle">Real-time matches streaming live across all sports</p>
+        </div>
+
+        <!-- Matches Grid -->
+        <div id="match-list" class="matches-grid">
+            <!-- Match cards will be populated by JavaScript -->
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-main">
+                <div class="footer-brand">
+                    <div class="footer-logo">
+                        <span class="logo-text">Reed</span>
+                        <span class="logo-accent">Streams</span>
+                    </div>
+                    <p class="footer-tagline">
+                        Your ultimate destination for free live sports streaming. Experience the thrill of the game without the subscription fees.
+                    </p>
+                </div>
+                
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h3 class="footer-heading">Navigation</h3>
+                        <a href="index.html" class="footer-link"><i class="fas fa-home"></i> Home</a>
+                        <a href="live-matches.html" class="footer-link"><i class="fas fa-broadcast-tower"></i> Live Now</a>
+                        <a href="upcoming.html" class="footer-link"><i class="fas fa-calendar-alt"></i> Upcoming</a>
+                    </div>
+                    
+                    <div class="footer-column">
+                        <h3 class="footer-heading">Quick Links</h3>
+                        <a href="live-matches.html?sportId=1&sportName=Football" class="footer-link"><i class="fas fa-futbol"></i> Football</a>
+                        <a href="live-matches.html?sportId=2&sportName=Basketball" class="footer-link"><i class="fas fa-basketball-ball"></i> Basketball</a>
+                        <a href="live-matches.html?sportId=3&sportName=Baseball" class="footer-link"><i class="fas fa-baseball-ball"></i> Baseball</a>
+                        <a href="live-matches.html?sportId=4&sportName=Hockey" class="footer-link"><i class="fas fa-hockey-puck"></i> Hockey</a>
+                    </div>
+                    
+                    <div class="footer-column">
+                        <h3 class="footer-heading">Support</h3>
+                        <a href="FAQ.html" class="footer-link"><i class="fas fa-question-circle"></i> FAQ</a>
+                        <a href="COntact.html" class="footer-link"><i class="fas fa-envelope"></i> Contact</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="legal-notice">
+                <p class="legal-text">
+                    <span class="legal-highlight">Important Notice:</span> ReedStreams does not host any of the streams displayed on this platform. All streams are sourced from third-party providers. For any takedown requests, please contact the content hosts directly.
+                </p>
+            </div>
+            
+            <div class="footer-bottom">
+                <div class="copyright">
+                    © 2025 ReedStreams. All rights reserved.
+                </div>
+                
+                <div class="footer-legal-links">
+                    <a href="privacypolicy.html" class="footer-legal-link">Privacy Policy</a>
+                    <a href="terms.html" class="footer-legal-link">Terms of Service</a>
+                    <a href="DMCA.html" class="footer-legal-link">DMCA</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Streamed.pk API Base URL
+        const STREAMED_API_BASE = "https://streamed.pk/api";
+
+        // Header scroll effect
+        window.addEventListener('scroll', function() {
+            const header = document.querySelector('.header');
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+
+        // Tab functionality
+        function showTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // You can add filtering logic here based on the selected tab
+            console.log('Showing tab:', tab);
+        }
+
+        // Function to get query parameters
+        function getQueryParam(param) {
+            return new URLSearchParams(window.location.search).get(param);
+        }
+
+        // Function to format match time
+        function formatMatchTime(dateString) {
+            try {
+                if (!dateString) return "LIVE";
+                const date = new Date(dateString);
+                if (isNaN(date)) return "LIVE";
+                
+                return date.toLocaleString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: true
+                });
+            } catch {
+                return "LIVE";
+            }
+        }
+
+        // Function to get team badge URL
+        function getTeamBadgeUrl(badgeId) {
+            if (!badgeId) return null;
+            return `${STREAMED_API_BASE}/images/badge/${badgeId}.webp`;
+        }
+
+        // Function to create team badge HTML
+        function createTeamBadgeHTML(team, side) {
+            if (!team) return `<div class="team-placeholder ${side}">?</div>`;
+            
+            const badgeUrl = getTeamBadgeUrl(team.badge);
+            
+            return `
+                <div class="team-info ${side}">
+                    ${badgeUrl ? `<img src="${badgeUrl}" alt="${team.name || 'Team'}" class="team-badge" onerror="this.style.display='none'">` : ''}
+                    <span class="team-name">${team.name || 'Unknown'}</span>
+                </div>
+            `;
+        }
+
+        // Main function to load live matches
+        async function loadLiveMatches() {
+            const sportId = getQueryParam("sportId");
+            const sportName = getQueryParam("sportName") || "Live";
+            const matchContainer = document.getElementById("match-list");
+            
+            matchContainer.innerHTML = '<div class="loading-message">Loading live matches...</div>';
+
+            try {
+                let apiUrl = `${STREAMED_API_BASE}/matches`;
+                if (sportId) {
+                    apiUrl = `${STREAMED_API_BASE}/matches/${sportId}`;
+                }
+
+                const res = await fetch(apiUrl);
+                
+                if (!res.ok) {
+                    throw new Error(`HTTP ${res.status}`);
+                }
+                
+                const matches = await res.json();
+
+                // Update page title
+                const pageTitle = document.querySelector("#page-title");
+                if (pageTitle) {
+                    if (sportName && sportName !== "Live") {
+                        pageTitle.textContent = `${sportName} - Live Matches`;
+                    } else {
+                        pageTitle.textContent = "Live Matches";
+                    }
+                }
+
+                if (!Array.isArray(matches) || matches.length === 0) {
+                    matchContainer.innerHTML = `<div class="no-matches">No live matches currently available. Check back later!</div>`;
+                    return;
+                }
+
+                matchContainer.innerHTML = '';
+
+                matches.forEach((match) => {
+                    const startTime = formatMatchTime(match.date);
+                    const homeTeam = match.teams?.home;
+                    const awayTeam = match.teams?.away;
+
+                    const matchCard = document.createElement("div");
+                    matchCard.className = "match-card";
+                    matchCard.innerHTML = `
+                        <div class="match-header">
+                            <h3 class="match-title">${match.title || "Live Match"}</h3>
+                            <span class="live-badge">LIVE</span>
+                        </div>
+                        <div class="teams-container">
+                            ${createTeamBadgeHTML(homeTeam, 'home')}
+                            <span class="vs-separator">VS</span>
+                            ${createTeamBadgeHTML(awayTeam, 'away')}
+                        </div>
+                        <div class="match-info">
+                            <span class="match-time">
+                                <i class="far fa-clock"></i> ${startTime}
+                            </span>
+                            ${match.competition ? `<span class="match-competition">${match.competition}</span>` : ''}
+                        </div>
+                        <button class="watch-link" data-match-id="${match.id}" data-match-data='${JSON.stringify(match)}'>
+                            <i class="fas fa-play-circle"></i> Watch Now
+                        </button>
+                    `;
+                    matchContainer.appendChild(matchCard);
+                });
+
+                // Add click handler for watch buttons
+                matchContainer.addEventListener("click", async (e) => {
+                    const btn = e.target.closest(".watch-link");
+                    if (!btn) return;
+
+                    const matchData = JSON.parse(btn.getAttribute("data-match-data"));
+                    
+                    // Store match data in sessionStorage for the match page
+                    sessionStorage.setItem('currentMatch', JSON.stringify(matchData));
+                    
+                    // Navigate to match page with match ID
+                    window.location.href = `match.html?matchId=${matchData.id}`;
+                });
+
+            } catch (err) {
+                console.error("Error fetching matches:", err);
+                matchContainer.innerHTML = '<div class="error-message">Failed to load matches. Please try again later.</div>';
+            }
+        }
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadLiveMatches();
+        });
+
+    </script>
+
+</body>
+</html>
